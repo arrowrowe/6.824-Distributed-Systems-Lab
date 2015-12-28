@@ -28,7 +28,32 @@ func (mr *MapReduce) KillWorkers() *list.List {
 	return l
 }
 
+func (mr *MapReduce) Handle(selfSize int, otherSize int, operation JobType) {
+	doneChannel := make(chan int, selfSize)
+	// Begin all Map workers parallelly.
+	for i := 0; i < selfSize; i++ {
+		// See [Go statements](https://golang.org/ref/spec#Go_statements).
+		go func (jobNumber int) {
+			for {
+				// See [Channels](https://gobyexample.com/channels).
+				worker := <- mr.registerChannel
+				if call(worker, "Worker.DoJob", &DoJobArgs{mr.file, operation, jobNumber, otherSize}, &DoJobReply{}) {
+					mr.registerChannel <- worker
+					doneChannel <- jobNumber
+					return
+				}
+			}
+		}(i)
+	}
+	// Wait for all Map workers.
+	for i := 0; i < selfSize; i++ {
+		fmt.Println(operation, "Job", <- doneChannel, "done")
+	}
+}
+
 func (mr *MapReduce) RunMaster() *list.List {
 	// Your code here
+	mr.Handle(mr.nMap, mr.nReduce, Map)
+	mr.Handle(mr.nReduce, mr.nMap, Reduce)
 	return mr.KillWorkers()
 }

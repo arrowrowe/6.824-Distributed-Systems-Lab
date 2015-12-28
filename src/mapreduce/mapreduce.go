@@ -74,7 +74,8 @@ func InitMapReduce(nmap int, nreduce int,
 	mr.file = file
 	mr.MasterAddress = master
 	mr.alive = true
-	mr.registerChannel = make(chan string)
+	// Prepare nmap * nreduce to prevent process block.
+	mr.registerChannel = make(chan string, nmap * nreduce)
 	mr.DoneChannel = make(chan bool)
 
 	// initialize any additional state here
