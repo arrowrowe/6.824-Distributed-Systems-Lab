@@ -30,7 +30,7 @@ func (mr *MapReduce) KillWorkers() *list.List {
 
 func (mr *MapReduce) Handle(selfSize int, otherSize int, operation JobType) {
 	doneChannel := make(chan int, selfSize)
-	// Begin all Map workers parallelly.
+	// Begin all workers parallelly.
 	for i := 0; i < selfSize; i++ {
 		// See [Go statements](https://golang.org/ref/spec#Go_statements).
 		go func (jobNumber int) {
@@ -45,7 +45,7 @@ func (mr *MapReduce) Handle(selfSize int, otherSize int, operation JobType) {
 			}
 		}(i)
 	}
-	// Wait for all Map workers.
+	// Wait for all workers.
 	for i := 0; i < selfSize; i++ {
 		fmt.Println(operation, "Job", <- doneChannel, "done")
 	}
