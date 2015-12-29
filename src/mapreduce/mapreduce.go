@@ -11,6 +11,7 @@ import "net/rpc"
 import "net"
 import "bufio"
 import "hash/fnv"
+import "math"
 
 // import "os/exec"
 
@@ -75,7 +76,7 @@ func InitMapReduce(nmap int, nreduce int,
 	mr.MasterAddress = master
 	mr.alive = true
 	// Prepare nmap * nreduce to prevent process block.
-	mr.registerChannel = make(chan string, nmap * nreduce)
+	mr.registerChannel = make(chan string, int(math.Max(float64(nmap), float64(nreduce))))
 	mr.DoneChannel = make(chan bool)
 
 	// initialize any additional state here
